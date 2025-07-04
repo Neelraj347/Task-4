@@ -1,0 +1,108 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void compressFile(const char *inputFile, const char *outputFile) {
+    FILE *in = fopen(inputFile, "r");
+    FILE *out = fopen(outputFile, "w");
+
+    if (in == NULL || out == NULL) {
+        printf("Error opening files.\n");
+        return;
+    }
+
+    char curr, prev;
+    int count = 1;
+
+    prev = fgetc(in);
+    if (prev == EOF) {
+        printf("Input file is empty.\n");
+        fclose(in);
+        fclose(out);
+        return;
+    }
+
+    while ((curr = fgetc(in)) != EOF) {
+        if (curr == prev) {
+            count++;
+            if (count == 255) {
+                fputc(count, out);
+                fputc(prev, out);
+                count = 0;
+            }
+        } else {
+            fputc(count, out);
+            fputc(prev, out);
+            count = 1;
+            prev = curr;
+        }
+    }
+    fputc(count, out);
+    fputc(prev, out);
+
+    fclose(in);
+    fclose(out);
+    printf("File compressed successfully.\n");
+}
+
+void decompressFile(const char *inputFile, const char *outputFile) {
+    FILE *in = fopen(inputFile, "r");
+    FILE *out = fopen(outputFile, "w");
+
+    if (in == NULL || out == NULL) {
+        printf("Error opening files.\n");
+        return;
+    }
+
+    int count;
+    char ch;
+
+    while ((count = fgetc(in)) != EOF) {
+        ch = fgetc(in);
+        if (ch == EOF) break;
+        for (int i = 0; i < count; i++) {
+            fputc(ch, out);
+        }
+    }
+
+    fclose(in);
+    fclose(out);
+    printf("File decompressed successfully.\n");
+}
+
+int main() {
+    int choice;
+    char inputFile[100], outputFile[100];
+
+    do {
+        printf("\n1. Compress File\n2. Decompress File\n3. Exit\nEnter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter input file name: ");
+                scanf("%s", inputFile);
+                printf("Enter output file name: ");
+                scanf("%s", outputFile);
+                compressFile(inputFile, outputFile);
+                break;
+
+            case 2:
+                printf("Enter compressed file name: ");
+                scanf("%s", inputFile);
+                printf("Enter output file name: ");
+                scanf("%s", outputFile);
+                decompressFile(inputFile, outputFile);
+                break;
+
+            case 3:
+                printf("Exiting program.\n");
+                break;
+
+            default:
+                printf("Invalid choice.\n");
+        }
+    } while (choice != 3);
+
+    return 0;
+}
